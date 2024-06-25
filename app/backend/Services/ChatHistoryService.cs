@@ -2,28 +2,27 @@
 #pragma warning disable SKEXP0003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 #pragma warning disable SKEXP0011 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Memory;
 using Azure.Core;
-using Azure.Identity;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Memory;
+using Newtonsoft.Json;
 
 public class ChatHistoryService : IChatHistoryService
 {
     private static string s_collection = "chathistory";
-    private readonly IMemoryStore _memoryStore;
-    private readonly Kernel _kernel;
+#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
     private readonly SemanticTextMemory _textMemory;
+#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    private readonly Kernel _kernel;
 
     public ChatHistoryService(
+#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         IMemoryStore memoryStore,
+#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
         IConfiguration configuration,
         TokenCredential? tokenCredential = null)
     {
-        _memoryStore = memoryStore;
         var kernelBuilder = Kernel.CreateBuilder();
         var embeddingModelName = configuration["AZURE_OPENAI_EMBEDDING_DEPLOYMENT"];
 
@@ -37,12 +36,12 @@ public class ChatHistoryService : IChatHistoryService
         _kernel = kernelBuilder.Build();
         // The combination of the text embedding generator and the memory store makes up the 'SemanticTextMemory' object used to
         // store and retrieve memories.
-        _textMemory = new(_memoryStore, _kernel.GetRequiredService<AzureOpenAITextEmbeddingGenerationService>());
+        _textMemory = new(memoryStore, _kernel.GetRequiredService<AzureOpenAITextEmbeddingGenerationService>());
     }
 
     public async Task AddChatHistorySession(ChatHistorySession chatHistory)
     {
-        await EnsureCollectionAsync();
+        //await EnsureCollectionAsync();
         var jsonHistory = JsonConvert.SerializeObject(chatHistory.ChatHistory);
         await _textMemory.SaveInformationAsync(s_collection, chatHistory.SessionId.ToString(), jsonHistory);
     }
@@ -52,12 +51,17 @@ public class ChatHistoryService : IChatHistoryService
         await _textMemory.RemoveAsync(s_collection, sessionId.ToString());
     }
 
-    public async Task<ChatHistorySession> GetChatHistorySession(string sessionId)
+    public async Task<ChatHistorySession?> GetChatHistorySession(string sessionId)
     {
-        await EnsureCollectionAsync();
+        //await EnsureCollectionAsync();
         var lookup = await _textMemory.GetAsync(s_collection, sessionId.ToString());
-        var chatHistory = JsonConvert.DeserializeObject<ChatHistory>(lookup?.Metadata.Text ?? "[]");
-        return new() { SessionId = sessionId, ChatHistory = chatHistory };
+
+        if (lookup == null)
+            return null;
+
+        var chatHistory = JsonConvert.DeserializeObject<ChatHistory>(lookup!.Metadata.Text ?? "[]");
+
+        return new() { SessionId = sessionId, ChatHistory = chatHistory ?? [] };
     }
 
     public Task<IEnumerable<ChatHistorySession>> GetChatHistorySessions()
@@ -65,14 +69,13 @@ public class ChatHistoryService : IChatHistoryService
         throw new NotImplementedException();
     }
 
-    private async Task EnsureCollectionAsync()
-    {
-        if (!await _memoryStore.DoesCollectionExistAsync(s_collection))
-        {
-            await _memoryStore.CreateCollectionAsync(s_collection);
-        }
-    }
+    // necessary?
+    //private async Task EnsureCollectionAsync()
+    //{
+    //    if (!await _memoryStore.DoesCollectionExistAsync(s_collection))
+    //    {
+    //        await _memoryStore.CreateCollectionAsync(s_collection);
+    //    }
+    //}
 }
 
-#pragma warning restore SKEXP0003 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-#pragma warning restore SKEXP0011 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Microsoft.AspNetCore.WebUtilities;
-using ChatHistorySession = ClientApp.Models.ChatHistorySession;
 
 namespace ClientApp.Pages;
 
@@ -33,10 +32,10 @@ public sealed partial class Chat
     }
 
     [Parameter]
-    [SupplyParameterFromQuery(Name = nameof(ChatHistorySession.Id))]
+    [SupplyParameterFromQuery(Name = nameof(ChatHistorySessionUI.Id))]
     public string? ChatSessionId { get; set; }
     [Inject]
-    internal ChatHistoryService ChatHistoryService { get; set; }
+    internal ChatHistoryServiceUI ChatHistoryService { get; set; }
 
     protected override void OnInitialized()
     {
@@ -59,7 +58,7 @@ public sealed partial class Chat
         Console.WriteLine("Loading chat history from query param");
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
 
-        if (!QueryHelpers.ParseQuery(uri.Query).TryGetValue(nameof(ChatHistorySession.SessionId), out var ChatSessionId))
+        if (!QueryHelpers.ParseQuery(uri.Query).TryGetValue(nameof(ChatHistorySessionUI.Id), out var ChatSessionId))
         {
             return;
         }
@@ -71,12 +70,17 @@ public sealed partial class Chat
 
         Console.WriteLine($"ChatSessionId: {ChatSessionId}");
 
-
-        if (ChatHistoryService.TryGetChatHistorySession(ChatSessionId, out var chatHistorySession))
+        if(!int.TryParse(ChatSessionId, out var chatSessionId))
         {
-            Console.WriteLine($"Replacing ChatHistorySession");
+            return;
+        }
+
+
+        if (ChatHistoryService.TryGetChatHistorySession(chatSessionId, out var chatHistorySessionUI))
+        {
+            Console.WriteLine($"Replacing ChatHistorySessionUI");
             _questionAndAnswerMap = [];
-            foreach (var i in chatHistorySession.QuestionAnswerMap)
+            foreach (var i in chatHistorySessionUI.QuestionAnswerMap)
             {
                 _questionAndAnswerMap[i.Key] = i.Value;
             }
@@ -136,8 +140,8 @@ public sealed partial class Chat
     {
         var newChatHistorySession = ChatHistoryService.AddChatHistorySession(_questionAndAnswerMap);
 
-        ChatSessionId = newChatHistorySession.SessionId;
-        NavigationManager.NavigateTo($"/chat?{nameof(ChatHistorySession.SessionId)}={newChatHistorySession.SessionId}");
+        ChatSessionId = newChatHistorySession.Id.ToString();
+        NavigationManager.NavigateTo($"/chat?{nameof(ChatHistorySessionUI.Id)}={newChatHistorySession.Id}");
     }
 
     private void OnPinQuestion(string question, DateTime askedOn)

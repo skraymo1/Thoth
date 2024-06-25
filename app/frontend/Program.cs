@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using ClientApp.Services;
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.RootComponents.Add<ClientApp.App>("#app");
@@ -21,7 +19,7 @@ builder.Services.AddSpeechRecognitionServices();
 builder.Services.AddSingleton<ITextToSpeechPreferencesListener, TextToSpeechPreferencesListenerService>();
 builder.Services.AddMudServices();
 builder.Services.AddTransient<IPdfViewer, WebPdfViewer>();
-builder.Services.AddSingleton<ChatHistoryService>();
+builder.Services.AddSingleton<ChatHistoryServiceUI>();
 builder.Services.AddSingleton<PinnedQueriesService>();
 
 await JSHost.ImportAsync(

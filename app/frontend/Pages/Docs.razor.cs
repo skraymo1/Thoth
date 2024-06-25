@@ -1,5 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Linq;
+
+
 namespace ClientApp.Pages;
 
 public sealed partial class Docs : IDisposable
@@ -47,9 +50,9 @@ public sealed partial class Docs : IDisposable
 
         try
         {
-            var documents =
-                await Client.GetDocumentsAsync(_cancellationTokenSource.Token)
-                    .ToListAsync();
+            var asyncPages = Client.GetDocumentsAsync(_cancellationTokenSource.Token);
+
+            var documents = await asyncPages.ToListAsync();
 
             foreach (var document in documents)
             {

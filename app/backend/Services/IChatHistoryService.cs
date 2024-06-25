@@ -4,7 +4,7 @@ public interface IChatHistoryService
 {
     Task AddChatHistorySession(ChatHistorySession chatHistory);
 
-    Task<ChatHistorySession> GetChatHistorySession(string sessionId);
+    Task<ChatHistorySession?> GetChatHistorySession(string sessionId);
 
     Task<IEnumerable<ChatHistorySession>> GetChatHistorySessions();
 

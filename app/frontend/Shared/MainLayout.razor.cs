@@ -8,7 +8,7 @@ public sealed partial class MainLayout
     [Inject]
     private NavigationManager _navigationManager { get; set; }
     [Inject]
-    private ChatHistoryService _chatHistoryService { get; set; }
+    private ChatHistoryServiceUI _chatHistoryService { get; set; }
     private readonly MudTheme _theme = new();
     private bool _drawerOpen = true;
     private bool _chatHistoryDrawer = false;
@@ -58,10 +58,10 @@ public sealed partial class MainLayout
 
     protected void OnItemClick(EventArgs e, int chatId)
     {
-        _navigationManager.NavigateTo($"/chat?{nameof(ChatHistorySession.SessionId)}={chatId}");
+        _navigationManager.NavigateTo($"/chat?{nameof(ChatHistorySessionUI.Id)}={chatId}");
     }
 
-    protected void OnDeleteSessionClick(EventArgs e, string chatId)
+    protected void OnDeleteSessionClick(EventArgs e, int chatId)
     {
         _chatHistoryService.DeleteChatHistorySession(chatId);
     }
