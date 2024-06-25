@@ -43,10 +43,9 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AD0C3759E44A49418421DF42F6C87B78 }}
 
       - name: 'Run Azure Functions Action'
-        uses: Azure/functions-action@v1
+        uses: Azure/functions-action@v1.5.1
         id: fa
         with:
           app-name: 'func-function-oeqqrylaoym5i'
-          slot-name: 'test'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
           
